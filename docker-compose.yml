@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:2.3.6
+    build: .
+    restart: always
+    hostname: jul-container-qa-traefik-all-01
+    container_name: jul-container-qa-traefik-all-01
+    command: --api.insecure=true
+    ports:
+      - 80:80     # The HTTP port
+      - 443:443   # The HTTPS port
+      - 8080:8080 # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      - traefik-certs:/etc/traefik/ssl/
+      - ./log:/var/log/traefik
+      - ${PWD}/traefik:/etc/traefik
+      - '/etc/localtime:/etc/localtime'
+    labels:
+      - SERVICE_IGNORE=true
+    logging:
+        options:
+            max-size: "1G"
+#    dns: 10.10.2.152
+    extra_hosts:
+    - "jul01.julqa.nsw.pt:185.101.177.4"
+#    - "jul02qa.nsw.pt:213.228.176.19"
+    - "jul02.julqa.nsw.pt:127.0.0.1"
+    - "juldomain.julqa.nsw.pt:127.0.0.1"
+
+volumes:
+  traefik-certs:
+    external: true
+
+
+networks:
+  default:
+    external:
+      name: proxy
